@@ -7,4 +7,13 @@ const pool = new Pool({
   }
 });
 
+// Testar a conexão
+pool.on('connect', () => {
+  console.log('✅ Conectado ao banco de dados Neon.tech');
+});
+
+pool.on('error', (err) => {
+  console.error('❌ Erro na conexão com o banco:', err);
+});
+
 module.exports = pool;

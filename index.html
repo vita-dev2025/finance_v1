@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finance - Controle Financeiro</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/modal.css">
+</head>
+<body>
+    <!-- Top Bar -->
+    <div class="top-bar">
+        <h1>Finance - Controle Financeiro</h1>
+        <div class="top-bar-actions">
+            <select id="periodoFiltro" class="filtro-periodo">
+                <option value="">Carregando períodos...</option>
+            </select>
+            <button id="btnTransacoes" class="btn-primary">Transações</button>
+        </div>
+    </div>
+
+    <!-- Conteúdo Principal -->
+    <div class="container">
+        <div class="resumo-caixas">
+            <div class="caixa entrada">
+                <h3>Entradas</h3>
+                <div class="valor" id="valorEntradas">R$ 0,00</div>
+            </div>
+            <div class="caixa saida">
+                <h3>Saídas</h3>
+                <div class="valor" id="valorSaidas">R$ 0,00</div>
+            </div>
+            <div class="caixa saldo">
+                <h3>Saldo</h3>
+                <div class="valor" id="valorSaldo">R$ 0,00</div>
+            </div>
+        </div>
+
+        <!-- Área para gráficos futuros -->
+        <div class="graficos-area">
+            <h2>Dashboard Financeiro</h2>
+            <p>Gráficos e análises serão implementados em breve.</p>
+        </div>
+    </div>
+
+    <!-- Loader -->
+    <div id="loader" class="loader hidden">
+        <div class="loader-content">
+            <div class="spinner"></div>
+            <p>Carregando...</p>
+        </div>
+    </div>
+
+    <script src="js/database.js"></script>
+    <script src="js/dashboard.js"></script>
+</body>
+</html>
