@@ -9,15 +9,33 @@ const pool = new Pool({
     }
 });
 
-// GET - Listar períodos
+// GET - Listar períodos (para transações - últimos 5 abertos/encerrados)
 router.get('/periodos', async (req, res) => {
     try {
         const query = `
             SELECT id, nome_periodo, dt_inicio, dt_fim, dt_abertura, dt_fechamento 
             FROM tbl_periodos 
-            WHERE dt_fechamento >= CURRENT_DATE OR dt_abertura <= CURRENT_DATE
+            WHERE (dt_fechamento >= CURRENT_DATE OR dt_abertura <= CURRENT_DATE)
+            AND dt_abertura <= CURRENT_DATE
             ORDER BY dt_inicio DESC 
             LIMIT 5
+        `;
+        const result = await pool.query(query);
+        res.json(result.rows);
+    } catch (error) {
+        console.error('Erro ao buscar períodos:', error);
+        res.status(500).json({ error: 'Erro interno do servidor' });
+    }
+});
+
+// GET - Listar todos os períodos para dashboard
+router.get('/periodos-todos', async (req, res) => {
+    try {
+        const query = `
+            SELECT id, nome_periodo, dt_inicio, dt_fim, dt_abertura, dt_fechamento 
+            FROM tbl_periodos 
+            WHERE dt_abertura <= CURRENT_DATE
+            ORDER BY dt_inicio DESC
         `;
         const result = await pool.query(query);
         res.json(result.rows);
@@ -60,7 +78,7 @@ router.get('/transacoes/:periodoId', async (req, res) => {
 router.get('/tipos-transacao/:tipo', async (req, res) => {
     try {
         const { tipo } = req.params;
-        const query = 'SELECT id, nm_trans, cat_trans FROM tbl_tp_transacoes WHERE tp_trans = $1';
+        const query = 'SELECT id, nm_trans, cat_trans FROM tbl_tp_transacoes WHERE tp_trans = $1 ORDER BY nm_trans';
         const result = await pool.query(query, [tipo]);
         res.json(result.rows);
     } catch (error) {

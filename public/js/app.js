@@ -106,13 +106,18 @@ class FinanceApp {
 
     async carregarPeriodosDashboard() {
         try {
-            const response = await fetch('/api/periodos');
+            const response = await fetch('/api/periodos-todos');
             const periodos = await response.json();
             this.renderPeriodosSelect(periodos);
             
             if (periodos.length > 0) {
                 const periodoAberto = periodos.find(p => this.getPeriodoStatus(p) === 'ABERTO') || periodos[0];
-                this.updateDashboard(periodoAberto.id);
+                
+                // CORREÇÃO: AGUARDAR O SELECT SER RENDERIZADO ANTES DE ATUALIZAR O DASHBOARD
+                setTimeout(() => {
+                    document.getElementById('selectPeriodo').value = periodoAberto.id;
+                    this.updateDashboard(periodoAberto.id);
+                }, 100);
             }
         } catch (error) {
             console.error('Erro ao carregar períodos:', error);
@@ -163,9 +168,10 @@ class FinanceApp {
         const dtAbertura = new Date(periodo.dt_abertura);
         const dtFechamento = new Date(periodo.dt_fechamento);
         
+        if (dtAbertura > hoje) return 'FUTURO';
         if (dtFechamento < hoje) return 'ENCERRADO';
         if (dtAbertura <= hoje && dtFechamento >= hoje) return 'ABERTO';
-        return 'FUTURO';
+        return 'ENCERRADO';
     }
 
     async abrirPeriodo(periodoId) {
@@ -240,13 +246,26 @@ class FinanceApp {
         document.getElementById('transacaoTipo').value = transacao.tp_trans;
         document.getElementById('transacaoRecorrencia').value = transacao.recorrencia_trans;
         document.getElementById('transacaoValor').value = this.formatarMoeda(transacao.valor_trans);
-        document.getElementById('transacaoData').value = transacao.dt_trans;
+        const dataTransacao = new Date(transacao.dt_trans);
+        document.getElementById('transacaoData').value = dataTransacao.toISOString().split('T')[0];
         document.getElementById('transacaoStatus').value = transacao.status_trans;
         document.getElementById('transacaoDescricao').value = transacao.desc_trans || '';
         
         // Carregar nomes de transação e selecionar o atual
         this.carregarNomesTransacao(transacao.tp_trans, 'transacaoNome', 'transacaoCategoria', transacao.id_nome_trans);
+
+        // GARANTIR QUE TODOS OS CAMPOS ESTEJAM DESABILITADOS INICIALMENTE
+        this.desabilitarEdicaoTransacao();
     }
+
+    desabilitarEdicaoTransacao() {
+        const campos = ['transacaoTipo', 'transacaoNome', 'transacaoRecorrencia', 'transacaoValor', 'transacaoData', 'transacaoStatus', 'transacaoDescricao'];
+        campos.forEach(campo => {
+            document.getElementById(campo).disabled = true;
+        });
+        document.getElementById('btnSalvarTransacao').style.display = 'none';
+    }
+
 
     async carregarNomesTransacao(tipo, selectId, categoriaId, selectedId = null) {
         const select = document.getElementById(selectId);
@@ -259,36 +278,66 @@ class FinanceApp {
             return;
         }
 
+        this.showLoader();
         try {
             const response = await fetch(`/api/tipos-transacao/${tipo}`);
             const tipos = await response.json();
             
-            select.innerHTML = '';
-            tipos.forEach(tipo => {
+            select.innerHTML = '<option value="">Selecione uma opção</option>';
+            tipos.forEach(tipoItem => {
                 const option = document.createElement('option');
-                option.value = tipo.id;
-                option.textContent = tipo.nm_trans;
-                option.dataset.categoria = tipo.cat_trans;
-                if (selectedId === tipo.id) {
+                option.value = tipoItem.id;
+                option.textContent = tipoItem.nm_trans;
+                option.dataset.categoria = tipoItem.cat_trans;
+                if (selectedId === tipoItem.id) {
                     option.selected = true;
-                    categoria.value = tipo.cat_trans;
+                    // CORREÇÃO: ATUALIZAR CATEGORIA IMEDIATAMENTE
+                    categoria.value = tipoItem.cat_trans;
                 }
                 select.appendChild(option);
             });
             
-            select.disabled = false;
+            // CORREÇÃO: MANTER O CAMPO DESABILITADO SE FOR O MODAL DE TRANSAÇÃO (NÃO DE REGISTRO)
+            if (selectId === 'transacaoNome') {
+                select.disabled = true; // Sempre desabilitado no modal de transação até editar
+            } else {
+                select.disabled = false; // Habilitado no modal de registro
+            }
+            
+            // CORREÇÃO: SE NÃO HÁ SELECTEDID, ATUALIZAR CATEGORIA COM A PRIMEIRA OPÇÃO QUANDO MUDAR
+            if (!selectedId && tipos.length > 0) {
+                // Adicionar event listener para atualizar categoria quando selecionar
+                select.addEventListener('change', () => {
+                    const selectedOption = select.options[select.selectedIndex];
+                    if (selectedOption && selectedOption.dataset.categoria) {
+                        categoria.value = selectedOption.dataset.categoria;
+                    }
+                });
+                
+                // Atualizar com a primeira opção se disponível
+                if (select.options.length > 1) {
+                    categoria.value = select.options[1].dataset.categoria;
+                }
+            }
         } catch (error) {
             console.error('Erro ao carregar tipos:', error);
+            select.innerHTML = '<option value="">Erro ao carregar opções</option>';
+        } finally {
+            this.hideLoader();
         }
     }
 
     atualizarCategoria(selectedId, categoriaId) {
-        const select = document.getElementById('transacaoNome');
-        const option = select.querySelector(`option[value="${selectedId}"]`);
+        const select = document.getElementById('transacaoNome') || document.getElementById('novoNome');
         const categoria = document.getElementById(categoriaId);
         
-        if (option) {
-            categoria.value = option.dataset.categoria;
+        if (select && selectedId) {
+            const option = select.querySelector(`option[value="${selectedId}"]`);
+            if (option && option.dataset.categoria) {
+                categoria.value = option.dataset.categoria;
+            }
+        } else {
+            categoria.value = '';
         }
     }
 
@@ -353,10 +402,18 @@ class FinanceApp {
             return;
         }
 
-        document.getElementById('novoPeriodo').value = this.currentPeriodo.nome_periodo;
+        // Limpar e preencher o formulário
         document.getElementById('formNovaTransacao').reset();
+        document.getElementById('novoPeriodo').value = this.currentPeriodo.nome_periodo;
         document.getElementById('novoNome').disabled = true;
         document.getElementById('novoCategoria').value = '';
+        
+        // Definir data atual como padrão
+        const hoje = new Date().toISOString().split('T')[0];
+        document.getElementById('novoData').value = hoje;
+        
+        // Definir status padrão como PREVISTO
+        document.getElementById('novoStatus').value = 'PREVISTO';
         
         this.openModal('modalRegistro');
     }
