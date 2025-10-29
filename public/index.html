@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finance - Controle Financeiro</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="top-bar">
+        <h1>Finance - Controle Financeiro</h1>
+        <div class="top-bar-actions">
+            <button id="btnTransacoes" class="btn-primary">Transações</button>
+            <select id="selectPeriodo" class="select-periodo">
+                <option value="">Carregando...</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="dashboard-cards">
+            <div class="card card-entrada">
+                <h3>Entradas</h3>
+                <div class="valor" id="valorEntradas">R$ 0,00</div>
+            </div>
+            <div class="card card-saida">
+                <h3>Saídas</h3>
+                <div class="valor" id="valorSaidas">R$ 0,00</div>
+            </div>
+            <div class="card card-saldo">
+                <h3>Saldo</h3>
+                <div class="valor" id="valorSaldo">R$ 0,00</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="loader" id="loader" style="display: none;">
+        <div class="loader-spinner"></div>
+        <p>Carregando...</p>
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>

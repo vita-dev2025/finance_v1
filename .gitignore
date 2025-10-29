@@ -1,15 +1,4 @@
-# Na pasta raiz do projeto
-cd C:\Users\slima\Desktop\finance_v1
-
-# Criar arquivo .gitignore
-echo node_modules/ > .gitignore
-echo .env >> .gitignore
-echo .env.local >> .gitignore
-echo .env.production >> .gitignore
-echo npm-debug.log* >> .gitignore
-echo yarn-debug.log* >> .gitignore
-echo yarn-error.log* >> .gitignore
-echo .DS_Store >> .gitignore
-echo dist/ >> .gitignore
-echo build/ >> .gitignore
-echo .cache/ >> .gitignore
+node_modules/
+.env
+.DS_Store
+*.log

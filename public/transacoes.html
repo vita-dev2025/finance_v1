@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transações Financeiras</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="top-bar">
+        <h1>Transações Financeiras</h1>
+    </div>
+
+    <div class="container">
+        <div class="table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Abrir</th>
+                        <th>Nome do Período</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="tabelaPeriodos">
+                    <tr>
+                        <td colspan="3">Carregando períodos...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Modal do Período -->
+    <div id="modalPeriodo" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalPeriodoTitulo">Transações do Período</h2>
+                <div class="modal-actions">
+                    <button id="btnNovaTransacao" class="btn-primary">Nova Transação</button>
+                    <button id="btnFecharPeriodo" class="btn-secondary">Fechar</button>
+                </div>
+            </div>
+            <div class="modal-body">
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Abrir</th>
+                                <th>Nome da Transação</th>
+                                <th>Valor</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelaTransacoes">
+                            <tr>
+                                <td colspan="4">Carregando transações...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal da Transação -->
+    <div id="modalTransacao" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Detalhes da Transação</h2>
+                <div class="modal-actions">
+                    <button id="btnEditarTransacao" class="btn-primary">Editar</button>
+                    <button id="btnFecharTransacao" class="btn-secondary">Fechar</button>
+                </div>
+            </div>
+            <div class="modal-body">
+                <form id="formTransacao">
+                    <div class="form-group">
+                        <label>Período:</label>
+                        <input type="text" id="transacaoPeriodo" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label>Tipo da Transação:</label>
+                        <select id="transacaoTipo" disabled>
+                            <option value="ENTRADA">ENTRADA</option>
+                            <option value="SAÍDA">SAÍDA</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Nome da Transação:</label>
+                        <select id="transacaoNome" disabled>
+                            <option value="">Selecione o tipo primeiro</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Categoria da Transação:</label>
+                        <input type="text" id="transacaoCategoria" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label>Recorrência:</label>
+                        <select id="transacaoRecorrencia" disabled>
+                            <option value="Fixo">Fixo</option>
+                            <option value="Variável">Variável</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Valor:</label>
+                        <input type="text" id="transacaoValor" disabled>
+                    </div>
+                    <div class="form-group">
+                        <label>Data:</label>
+                        <input type="date" id="transacaoData" disabled>
+                    </div>
+                    <div class="form-group">
+                        <label>Status:</label>
+                        <select id="transacaoStatus" disabled>
+                            <option value="OK">OK</option>
+                            <option value="PREVISTO">PREVISTO</option>
+                            <option value="CANCELADO">CANCELADO</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Descrição:</label>
+                        <textarea id="transacaoDescricao" disabled></textarea>
+                    </div>
+                    <button type="button" id="btnSalvarTransacao" class="btn-primary" style="display: none;">Salvar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Registro -->
+    <div id="modalRegistro" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Registro de Transação Financeira</h2>
+                <div class="modal-actions">
+                    <button id="btnSalvarNovaTransacao" class="btn-primary">Salvar</button>
+                    <button id="btnFecharRegistro" class="btn-secondary">Fechar</button>
+                </div>
+            </div>
+            <div class="modal-body">
+                <form id="formNovaTransacao">
+                    <div class="form-group">
+                        <label>Período:</label>
+                        <input type="text" id="novoPeriodo" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label>Tipo da Transação:</label>
+                        <select id="novoTipo" required>
+                            <option value="">Selecione</option>
+                            <option value="ENTRADA">ENTRADA</option>
+                            <option value="SAÍDA">SAÍDA</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Nome da Transação:</label>
+                        <select id="novoNome" required disabled>
+                            <option value="">Selecione o tipo primeiro</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Categoria da Transação:</label>
+                        <input type="text" id="novoCategoria" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label>Recorrência:</label>
+                        <select id="novoRecorrencia" required>
+                            <option value="">Selecione</option>
+                            <option value="Fixo">Fixo</option>
+                            <option value="Variável">Variável</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Valor:</label>
+                        <input type="text" id="novoValor" required placeholder="R$ 0,00">
+                    </div>
+                    <div class="form-group">
+                        <label>Data:</label>
+                        <input type="date" id="novoData" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Status:</label>
+                        <select id="novoStatus" required>
+                            <option value="">Selecione</option>
+                            <option value="OK">OK</option>
+                            <option value="PREVISTO">PREVISTO</option>
+                            <option value="CANCELADO">CANCELADO</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Descrição:</label>
+                        <textarea id="novoDescricao"></textarea>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="loader" id="loader" style="display: none;">
+        <div class="loader-spinner"></div>
+        <p>Carregando...</p>
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>
