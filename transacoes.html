@@ -1,0 +1,1030 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transações Financeiras - Finance</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+        }
+
+        /* Top Bar */
+        .top-bar {
+            background: white;
+            padding: 15px 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .top-bar h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: #3498db;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2980b9;
+        }
+
+        .btn-success {
+            background: #27ae60;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #219a52;
+        }
+
+        .btn-danger {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c0392b;
+        }
+
+        /* Corpo */
+        .corpo {
+            margin-top: 80px;
+            padding: 20px;
+        }
+
+        /* Tabelas */
+        .table-container {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+
+        .status-aberto {
+            color: #27ae60;
+            font-weight: 600;
+        }
+
+        .status-encerrado {
+            color: #7f8c8d;
+        }
+
+        .linha-aberta {
+            background: #f0fff4 !important;
+        }
+
+        .btn-icon {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 5px;
+            color: #3498db;
+            font-size: 1.2rem;
+        }
+
+        .valor-entrada {
+            color: #27ae60;
+            font-weight: 600;
+        }
+
+        .valor-saida {
+            color: #e74c3c;
+            font-weight: 600;
+        }
+
+        /* Modais */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 2000;
+        }
+
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-small {
+            max-width: 600px;
+        }
+
+        .modal-header {
+            background: white;
+            padding: 15px 20px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            font-size: 1.3rem;
+            color: #2c3e50;
+        }
+
+        .modal-body {
+            padding: 20px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .modal-footer {
+            padding: 15px 20px;
+            border-top: 1px solid #eee;
+            background: #f8f9fa;
+            text-align: right;
+        }
+
+        /* Formulários */
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #2c3e50;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        /* Loader */
+        .loader {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .loader-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 2s linear infinite;
+            margin: 0 auto;
+        }
+
+        .modal-loader {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255,255,255,0.8);
+            z-index: 3000;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsivo */
+        @media (max-width: 768px) {
+            .top-bar {
+                padding: 12px 15px;
+            }
+            
+            .top-bar h1 {
+                font-size: 1.3rem;
+            }
+            
+            .corpo {
+                margin-top: 70px;
+                padding: 15px;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            table {
+                font-size: 0.9rem;
+            }
+            
+            th, td {
+                padding: 8px 10px;
+            }
+
+            .modal-header {
+                flex-direction: column;
+                gap: 10px;
+                align-items: flex-start;
+            }
+
+            .modal-header div {
+                align-self: flex-end;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loader Global para Modais -->
+    <div class="modal-loader" id="globalModalLoader">
+        <div class="loader-spinner"></div>
+        <p style="margin-top: 10px;">Processando...</p>
+    </div>
+
+    <!-- Top Bar Principal -->
+    <div class="top-bar">
+        <h1>Transações Financeiras</h1>
+        <button class="btn btn-primary" onclick="window.location.href='/'">Dashboard</button>
+    </div>
+
+    <!-- Corpo Principal -->
+    <div class="corpo">
+        <div class="loader" id="mainLoader">
+            <div class="loader-spinner"></div>
+            <p>Carregando períodos...</p>
+        </div>
+
+        <div class="table-container">
+            <table id="tabelaPeriodos">
+                <thead>
+                    <tr>
+                        <th width="60px">Abrir</th>
+                        <th>Nome do Período</th>
+                        <th>Status do Período</th>
+                    </tr>
+                </thead>
+                <tbody id="tbodyPeriodos">
+                    <!-- Períodos serão carregados via JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Modal do Período (CORRIGIDO) -->
+    <div id="modalPeriodo" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="tituloPeriodo">Transações do Período</h2>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <button class="btn btn-success" id="btnNovaTransacao">Nova Transação</button>
+                    <button class="btn btn-danger" onclick="fecharModalPeriodo()">Fechar</button>
+                </div>
+            </div>
+            <div class="modal-body">
+                <div class="loader" id="loaderPeriodo">
+                    <div class="loader-spinner"></div>
+                    <p>Carregando transações...</p>
+                </div>
+                <div class="table-container">
+                    <table id="tabelaTransacoes">
+                        <thead>
+                            <tr>
+                                <th width="60px">Abrir</th>
+                                <th>Nome da Transação</th>
+                                <th>Valor da Transação</th>
+                                <th>Status da Transação</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyTransacoes">
+                            <!-- Transações serão carregadas via JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal da Transação -->
+    <div id="modalTransacao" class="modal">
+        <div class="modal-content modal-small">
+            <div class="modal-header">
+                <h2>Detalhes da Transação</h2>
+                <div>
+                    <button class="btn btn-primary" id="btnEditarTransacao">Editar</button>
+                    <button class="btn btn-danger" onclick="fecharModalTransacao()">Fechar</button>
+                </div>
+            </div>
+            <div class="modal-body">
+                <form id="formTransacao">
+                    <div class="form-group">
+                        <label>Período:</label>
+                        <input type="text" id="transacaoPeriodo" class="form-control" readonly>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Tipo da Transação:</label>
+                            <select id="transacaoTipo" class="form-control" disabled>
+                                <option value="">Selecione</option>
+                                <option value="ENTRADA">ENTRADA</option>
+                                <option value="SAÍDA">SAÍDA</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Nome da Transação:</label>
+                            <select id="transacaoNome" class="form-control" disabled>
+                                <option value="">Selecione o tipo primeiro</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Categoria da Transação:</label>
+                        <input type="text" id="transacaoCategoria" class="form-control" readonly>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Recorrência da Transação:</label>
+                            <select id="transacaoRecorrencia" class="form-control" disabled>
+                                <option value="">Selecione</option>
+                                <option value="Fixo">Fixo</option>
+                                <option value="Variável">Variável</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Valor da Transação:</label>
+                            <input type="text" id="transacaoValor" class="form-control" disabled>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Data da Transação:</label>
+                            <input type="date" id="transacaoData" class="form-control" disabled>
+                        </div>
+                        <div class="form-group">
+                            <label>Status da Transação:</label>
+                            <select id="transacaoStatus" class="form-control" disabled>
+                                <option value="PREVISTO">PREVISTO</option>
+                                <option value="OK">OK</option>
+                                <option value="CANCELADO">CANCELADO</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Forma da Transação:</label>
+                        <select id="transacaoForma" class="form-control" disabled>
+                            <option value="">Selecione</option>
+                            <option value="Conta Corrente">Conta Corrente</option>
+                            <option value="Cartão Beneficio">Cartão Beneficio</option>
+                            <option value="Cartão de Credito">Cartão de Credito</option>
+                            <option value="Voucher">Voucher</option>
+                            <option value="Limite Especial">Limite Especial</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Descrição da Transação:</label>
+                        <textarea id="transacaoDescricao" class="form-control" rows="3" disabled></textarea>
+                    </div>
+                    <div class="form-group" id="divSalvarTransacao" style="display: none;">
+                        <button type="button" class="btn btn-success" onclick="salvarTransacao()">Salvar Alterações</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Registro -->
+    <div id="modalRegistro" class="modal">
+        <div class="modal-content modal-small">
+            <div class="modal-header">
+                <h2>Registro de Transação Financeira</h2>
+                <div>
+                    <button class="btn btn-success" onclick="salvarNovaTransacao()">Salvar</button>
+                    <button class="btn btn-danger" onclick="fecharModalRegistro()">Fechar</button>
+                </div>
+            </div>
+            <div class="modal-body">
+                <form id="formRegistro">
+                    <div class="form-group">
+                        <label>Período:</label>
+                        <input type="text" id="registroPeriodo" class="form-control" readonly>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Tipo da Transação:</label>
+                            <select id="registroTipo" class="form-control" required>
+                                <option value="">Selecione</option>
+                                <option value="ENTRADA">ENTRADA</option>
+                                <option value="SAÍDA">SAÍDA</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Nome da Transação:</label>
+                            <select id="registroNome" class="form-control" required disabled>
+                                <option value="">Selecione o tipo primeiro</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Categoria da Transação:</label>
+                        <input type="text" id="registroCategoria" class="form-control" readonly>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Recorrência da Transação:</label>
+                            <select id="registroRecorrencia" class="form-control" required>
+                                <option value="">Selecione</option>
+                                <option value="Fixo">Fixo</option>
+                                <option value="Variável">Variável</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Valor da Transação (R$):</label>
+                            <input type="text" id="registroValor" class="form-control" required 
+                                   placeholder="0,00" oninput="formatarValor(this)">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Data da Transação:</label>
+                            <input type="date" id="registroData" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Forma da Transação:</label>
+                            <select id="registroForma" class="form-control" required>
+                                <option value="">Selecione</option>
+                                <option value="Conta Corrente">Conta Corrente</option>
+                                <option value="Cartão Beneficio">Cartão Beneficio</option>
+                                <option value="Cartão de Credito">Cartão de Credito</option>
+                                <option value="Voucher">Voucher</option>
+                                <option value="Limite Especial">Limite Especial</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Descrição da Transação (Opcional):</label>
+                        <textarea id="registroDescricao" class="form-control" rows="3"></textarea>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Variáveis globais
+        let periodos = [];
+        let transacoes = [];
+        let periodoAtual = null;
+        let transacaoAtual = null;
+        let tiposTransacao = { ENTRADA: [], SAÍDA: [] };
+        let modoEdicao = false;
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            carregarPeriodos();
+            carregarTiposTransacao();
+        });
+
+        // Carregar períodos
+        async function carregarPeriodos() {
+            showLoader('mainLoader');
+            try {
+                const response = await fetch('/api/periodos');
+                periodos = await response.json();
+                renderizarPeriodos();
+            } catch (error) {
+                console.error('Erro ao carregar períodos:', error);
+                alert('Erro ao carregar períodos');
+            } finally {
+                hideLoader('mainLoader');
+            }
+        }
+
+        // Carregar tipos de transação
+        async function carregarTiposTransacao() {
+            try {
+                const [entradaResponse, saidaResponse] = await Promise.all([
+                    fetch('/api/tipos-transacao/ENTRADA'),
+                    fetch('/api/tipos-transacao/SAÍDA')
+                ]);
+                
+                tiposTransacao.ENTRADA = await entradaResponse.json();
+                tiposTransacao.SAÍDA = await saidaResponse.json();
+            } catch (error) {
+                console.error('Erro ao carregar tipos de transação:', error);
+            }
+        }
+
+        // Renderizar períodos na tabela
+        function renderizarPeriodos() {
+            const tbody = document.getElementById('tbodyPeriodos');
+            tbody.innerHTML = '';
+
+            periodos.forEach(periodo => {
+                const status = calcularStatusPeriodo(periodo);
+                const isAberto = status === 'ABERTO';
+                
+                const tr = document.createElement('tr');
+                if (isAberto) tr.classList.add('linha-aberta');
+                
+                tr.innerHTML = `
+                    <td>
+                        <button class="btn-icon" onclick="abrirPeriodo(${periodo.id})">📋</button>
+                    </td>
+                    <td>${periodo.nome_periodo}</td>
+                    <td class="${isAberto ? 'status-aberto' : 'status-encerrado'}">
+                        ${status}
+                    </td>
+                `;
+                
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Calcular status do período
+        function calcularStatusPeriodo(periodo) {
+            const hoje = new Date();
+            const dtAbertura = new Date(periodo.dt_abertura);
+            const dtFechamento = new Date(periodo.dt_fechamento);
+
+            if (dtFechamento < hoje) return 'ENCERRADO';
+            if (dtAbertura <= hoje && dtFechamento >= hoje) return 'ABERTO';
+            return 'NÃO INICIADO';
+        }
+
+        // Abrir modal do período
+        async function abrirPeriodo(periodoId) {
+            periodoAtual = periodos.find(p => p.id === periodoId);
+            if (!periodoAtual) return;
+
+            const status = calcularStatusPeriodo(periodoAtual);
+            document.getElementById('tituloPeriodo').textContent = 
+                `Transações do Período ${periodoAtual.nome_periodo} (${status})`;
+            
+            // Configurar botão nova transação
+            const btnNova = document.getElementById('btnNovaTransacao');
+            btnNova.onclick = status === 'ABERTO' ? () => abrirModalRegistro() : 
+                () => alert('Período encerrado. Não é possível adicionar transações.');
+
+            showModal('modalPeriodo');
+            await carregarTransacoesPeriodo(periodoId);
+        }
+
+        // Carregar transações do período
+        async function carregarTransacoesPeriodo(periodoId) {
+            showLoader('loaderPeriodo');
+            try {
+                const response = await fetch(`/api/transacoes/${periodoId}`);
+                transacoes = await response.json();
+                renderizarTransacoes();
+            } catch (error) {
+                console.error('Erro ao carregar transações:', error);
+                alert('Erro ao carregar transações do período');
+            } finally {
+                hideLoader('loaderPeriodo');
+            }
+        }
+
+        // Renderizar transações na tabela
+        function renderizarTransacoes() {
+            const tbody = document.getElementById('tbodyTransacoes');
+            tbody.innerHTML = '';
+
+            // Separar entradas e saídas
+            const entradas = transacoes.filter(t => t.tp_trans === 'ENTRADA');
+            const saidas = transacoes.filter(t => t.tp_trans === 'SAÍDA');
+
+            // Renderizar entradas
+            entradas.forEach(transacao => {
+                tbody.appendChild(criarLinhaTransacao(transacao));
+            });
+
+            // Renderizar saídas
+            saidas.forEach(transacao => {
+                tbody.appendChild(criarLinhaTransacao(transacao));
+            });
+        }
+
+        // Criar linha da tabela para transação
+        function criarLinhaTransacao(transacao) {
+            const tr = document.createElement('tr');
+            const valorFormatado = formatarMoeda(transacao.valor_trans);
+            const classeValor = transacao.tp_trans === 'ENTRADA' ? 'valor-entrada' : 'valor-saida';
+            
+            tr.innerHTML = `
+                <td>
+                    <button class="btn-icon" onclick="abrirTransacao(${transacao.id})">📋</button>
+                </td>
+                <td>${transacao.nm_trans}</td>
+                <td class="${classeValor}">${valorFormatado}</td>
+                <td>${transacao.status_trans}</td>
+            `;
+            
+            return tr;
+        }
+
+        // Abrir modal da transação
+        function abrirTransacao(transacaoId) {
+            transacaoAtual = transacoes.find(t => t.id === transacaoId);
+            if (!transacaoAtual) return;
+
+            modoEdicao = false;
+            preencherFormularioTransacao();
+            showModal('modalTransacao');
+        }
+
+        // Preencher formulário da transação
+        function preencherFormularioTransacao() {
+            document.getElementById('transacaoPeriodo').value = periodoAtual.nome_periodo;
+            document.getElementById('transacaoTipo').value = transacaoAtual.tp_trans;
+            document.getElementById('transacaoRecorrencia').value = transacaoAtual.recorrencia_trans;
+            document.getElementById('transacaoValor').value = formatarMoeda(transacaoAtual.valor_trans);
+            
+            // CORREÇÃO DA DATA
+            if (transacaoAtual.dt_trans) {
+                const data = new Date(transacaoAtual.dt_trans);
+                const dataFormatada = data.toISOString().split('T')[0];
+                document.getElementById('transacaoData').value = dataFormatada;
+            }
+            
+            document.getElementById('transacaoStatus').value = transacaoAtual.status_trans;
+            document.getElementById('transacaoForma').value = transacaoAtual.forma_trans;
+            document.getElementById('transacaoDescricao').value = transacaoAtual.desc_trans || '';
+
+            // Carregar nomes de transação baseado no tipo
+            carregarNomesTransacao('transacaoTipo', 'transacaoNome', 'transacaoCategoria');
+            document.getElementById('transacaoNome').value = transacaoAtual.nm_trans;
+            document.getElementById('transacaoCategoria').value = transacaoAtual.cat_trans;
+        }
+
+        // Abrir modal de registro
+        function abrirModalRegistro() {
+            // CORREÇÃO: Garantir que o período seja preenchido ANTES de limpar o formulário
+            document.getElementById('registroPeriodo').value = periodoAtual.nome_periodo;
+            limparFormularioRegistro();
+            showModal('modalRegistro');
+        }
+
+        // Limpar formulário de registro
+        function limparFormularioRegistro() {
+            document.getElementById('formRegistro').reset();
+            document.getElementById('registroNome').disabled = true;
+            document.getElementById('registroCategoria').value = '';
+            // CORREÇÃO: Manter o período preenchido após o reset
+            document.getElementById('registroPeriodo').value = periodoAtual.nome_periodo;
+        }
+
+        // Carregar nomes de transação
+        function carregarNomesTransacao(selectTipoId, selectNomeId, inputCategoriaId) {
+            const tipo = document.getElementById(selectTipoId).value;
+            const selectNome = document.getElementById(selectNomeId);
+            const inputCategoria = document.getElementById(inputCategoriaId);
+
+            selectNome.innerHTML = '<option value="">Selecione...</option>';
+            
+            // CORREÇÃO: Só habilita se estiver em modo de edição ou for modal de registro
+            if (selectNomeId === 'transacaoNome' && !modoEdicao) {
+                selectNome.disabled = true;
+            } else {
+                selectNome.disabled = !tipo;
+            }
+
+            if (tipo && tiposTransacao[tipo]) {
+                tiposTransacao[tipo].forEach(item => {
+                    const option = document.createElement('option');
+                    option.value = item.nm_trans;
+                    option.textContent = item.nm_trans;
+                    option.dataset.categoria = item.cat_trans;
+                    option.dataset.id = item.id;
+                    selectNome.appendChild(option);
+                });
+            }
+
+            // Atualizar categoria quando selecionar nome
+            selectNome.onchange = function() {
+                const selectedOption = selectNome.options[selectNome.selectedIndex];
+                inputCategoria.value = selectedOption.dataset.categoria || '';
+            };
+        }
+
+        // Salvar nova transação
+        async function salvarNovaTransacao() {
+            const form = document.getElementById('formRegistro');
+            if (!validarFormulario(form)) return;
+
+            const nomeSelect = document.getElementById('registroNome');
+            const selectedOption = nomeSelect.options[nomeSelect.selectedIndex];
+            const idNomeTrans = selectedOption.dataset.id;
+
+            const transacao = {
+                id_periodo: periodoAtual.id,
+                tp_trans: document.getElementById('registroTipo').value,
+                id_nome_trans: idNomeTrans,
+                recorrencia_trans: document.getElementById('registroRecorrencia').value,
+                valor_trans: parseFloat(document.getElementById('registroValor').value.replace(/\./g, '').replace(',', '.')),
+                dt_trans: document.getElementById('registroData').value,
+                forma_trans: document.getElementById('registroForma').value,
+                desc_trans: document.getElementById('registroDescricao').value
+            };
+
+            // CORREÇÃO: Mostrar loader global
+            showGlobalLoader();
+            try {
+                const response = await fetch('/api/transacoes', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(transacao)
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    alert('Transação salva com sucesso!');
+                    fecharModalRegistro();
+                    await carregarTransacoesPeriodo(periodoAtual.id);
+                } else {
+                    alert('Erro ao salvar transação');
+                }
+            } catch (error) {
+                console.error('Erro ao salvar transação:', error);
+                alert('Erro ao salvar transação');
+            } finally {
+                hideGlobalLoader();
+            }
+        }
+
+        // Salvar transação editada
+        async function salvarTransacao() {
+            const form = document.getElementById('formTransacao');
+            if (!validarFormularioTransacao()) return;
+
+            const nomeSelect = document.getElementById('transacaoNome');
+            const selectedOption = nomeSelect.options[nomeSelect.selectedIndex];
+            const idNomeTrans = selectedOption.dataset.id;
+
+            // CORREÇÃO: Converter valor corretamente para número
+            const valorTexto = document.getElementById('transacaoValor').value;
+            const valorNumerico = parseFloat(valorTexto.replace(/[^\d,-]/g, '').replace('.', '').replace(',', '.'));
+
+            const transacao = {
+                tp_trans: document.getElementById('transacaoTipo').value,
+                id_nome_trans: parseInt(idNomeTrans),
+                recorrencia_trans: document.getElementById('transacaoRecorrencia').value,
+                valor_trans: valorNumerico,
+                dt_trans: document.getElementById('transacaoData').value,
+                status_trans: document.getElementById('transacaoStatus').value,
+                forma_trans: document.getElementById('transacaoForma').value,
+                desc_trans: document.getElementById('transacaoDescricao').value
+            };
+
+            // CORREÇÃO: Mostrar loader global
+            showGlobalLoader();
+            try {
+                const response = await fetch(`/api/transacoes/${transacaoAtual.id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(transacao)
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    alert('Transação atualizada com sucesso!');
+                    fecharModalTransacao();
+                    await carregarTransacoesPeriodo(periodoAtual.id);
+                } else {
+                    alert('Erro ao atualizar transação: ' + (result.error || 'Erro desconhecido'));
+                }
+            } catch (error) {
+                console.error('Erro ao atualizar transação:', error);
+                alert('Erro ao atualizar transação. Verifique o console para mais detalhes.');
+            } finally {
+                hideGlobalLoader();
+            }
+        }
+
+        // Validar formulário de registro
+        function validarFormulario(form) {
+            const requiredFields = form.querySelectorAll('[required]');
+            for (let field of requiredFields) {
+                if (!field.value.trim()) {
+                    alert(`O campo "${field.labels[0].textContent}" é obrigatório`);
+                    field.focus();
+                    return false;
+                }
+            }
+
+            // Validar valor
+            const valorField = form.querySelector('input[type="text"][id*="Valor"]');
+            if (valorField) {
+                const valor = parseFloat(valorField.value.replace(/\./g, '').replace(',', '.'));
+                if (isNaN(valor) || valor <= 0) {
+                    alert('O valor deve ser maior que zero');
+                    valorField.focus();
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        // CORREÇÃO: Validar formulário de transação (separado para tratar valor formatado)
+        function validarFormularioTransacao() {
+            const requiredFields = document.querySelectorAll('#formTransacao [required]');
+            for (let field of requiredFields) {
+                if (!field.value.trim()) {
+                    alert(`O campo "${field.labels[0].textContent}" é obrigatório`);
+                    field.focus();
+                    return false;
+                }
+            }
+
+            // CORREÇÃO: Validar valor formatado corretamente
+            const valorField = document.getElementById('transacaoValor');
+            if (valorField) {
+                // Remover formatação de moeda e converter para número
+                const valorTexto = valorField.value.replace(/[^\d,-]/g, '').replace('.', '').replace(',', '.');
+                const valor = parseFloat(valorTexto);
+                if (isNaN(valor) || valor <= 0) {
+                    alert('O valor deve ser maior que zero');
+                    valorField.focus();
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        // Formatar valor monetário
+        function formatarValor(input) {
+            let value = input.value.replace(/\D/g, '');
+            value = (value / 100).toFixed(2);
+            value = value.replace('.', ',');
+            value = value.replace(/(\d)(?=(\d{3})+,)/g, '$1.');
+            input.value = value;
+        }
+
+        // Formatar moeda para exibição
+        function formatarMoeda(valor) {
+            return new Intl.NumberFormat('pt-BR', {
+                style: 'currency',
+                currency: 'BRL'
+            }).format(valor);
+        }
+
+        // Controles de modal
+        function showModal(modalId) {
+            document.getElementById(modalId).style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        }
+
+        function hideModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+            document.body.style.overflow = 'auto';
+            // Resetar scroll do modal
+            const modalBody = document.querySelector(`#${modalId} .modal-body`);
+            if (modalBody) modalBody.scrollTop = 0;
+        }
+
+        function fecharModalPeriodo() {
+            hideModal('modalPeriodo');
+            periodoAtual = null;
+            transacoes = [];
+        }
+
+        function fecharModalTransacao() {
+            if (document.getElementById('divSalvarTransacao').style.display !== 'none') {
+                if (!confirm('Deseja fechar? As alterações não salvas serão perdidas.')) return;
+            }
+            hideModal('modalTransacao');
+            transacaoAtual = null;
+            modoEdicao = false;
+            document.getElementById('divSalvarTransacao').style.display = 'none';
+            document.querySelectorAll('#formTransacao .form-control').forEach(input => input.disabled = true);
+        }
+
+        function fecharModalRegistro() {
+            hideModal('modalRegistro');
+            limparFormularioRegistro();
+        }
+
+        // CORREÇÃO: Loader global para modais
+        function showGlobalLoader() {
+            document.getElementById('globalModalLoader').style.display = 'flex';
+        }
+
+        function hideGlobalLoader() {
+            document.getElementById('globalModalLoader').style.display = 'none';
+        }
+
+        // Controles de edição
+        document.getElementById('btnEditarTransacao').onclick = function() {
+            if (calcularStatusPeriodo(periodoAtual) === 'ENCERRADO') {
+                alert('Período encerrado. Não é possível editar transações.');
+                return;
+            }
+
+            modoEdicao = true;
+            document.querySelectorAll('#formTransacao .form-control').forEach(input => {
+                if (input.id !== 'transacaoPeriodo' && input.id !== 'transacaoCategoria') {
+                    input.disabled = false;
+                }
+            });
+            
+            // CORREÇÃO: Habilitar também o campo nome da transação
+            document.getElementById('transacaoNome').disabled = false;
+            
+            document.getElementById('divSalvarTransacao').style.display = 'block';
+        };
+
+        // Loaders
+        function showLoader(loaderId) {
+            document.getElementById(loaderId).style.display = 'block';
+        }
+
+        function hideLoader(loaderId) {
+            document.getElementById(loaderId).style.display = 'none';
+        }
+
+        // Event listeners para carregar nomes de transação
+        document.getElementById('registroTipo').addEventListener('change', function() {
+            carregarNomesTransacao('registroTipo', 'registroNome', 'registroCategoria');
+        });
+
+        document.getElementById('transacaoTipo').addEventListener('change', function() {
+            // CORREÇÃO: Manter campo habilitado em modo edição
+            if (modoEdicao) {
+                document.getElementById('transacaoNome').disabled = false;
+            }
+            carregarNomesTransacao('transacaoTipo', 'transacaoNome', 'transacaoCategoria');
+        });
+    </script>
+</body>
+</html>
